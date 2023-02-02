@@ -32,7 +32,7 @@ def datetoday2():
 
 #### Initializing VideoCapture object to access WebCam
 face_detector = cv2.CascadeClassifier('static/haarcascade_frontalface_default.xml')
-#cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 
 #### If these directories don't exist, create them
 if not os.path.isdir('static/faces'):
@@ -192,5 +192,5 @@ def add():
 
 #### Our main function which runs the Flask App
 if __name__ == '__main__':
-    app.run(debug=TRUE)
+    app.run(debug=True)
     
