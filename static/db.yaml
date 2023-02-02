@@ -1,4 +1,4 @@
-mysql_host: "0.0.0.0"
+mysql_host: 'localhost'
 mysql_user: 'root'
 mysql_password: 'Veer@123'
 mysql_db: 'attendanceSystem'
