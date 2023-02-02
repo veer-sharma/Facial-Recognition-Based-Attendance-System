@@ -5,3 +5,4 @@ scikit-learn
 joblib~=1.2.0
 numpy
 Flask-MySQLdb~=1.0.1
+waitress
