@@ -32,7 +32,7 @@ def datetoday2():
 
 #### Initializing VideoCapture object to access WebCam
 face_detector = cv2.CascadeClassifier('static/haarcascade_frontalface_default.xml')
-cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(0)
 
 #### If these directories don't exist, create them
 if not os.path.isdir('static/faces'):
