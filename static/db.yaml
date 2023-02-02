@@ -1,4 +1,4 @@
-mysql_host: 'localhost'
+mysql_host: 'containers-us-west-75.railway.app:5724'
 mysql_user: 'root'
-mysql_password: 'Veer@123'
-mysql_db: 'attendanceSystem'
+mysql_password: 'aaWqwpgrCp8mV7zniiwm'
+mysql_db: 'railway'
