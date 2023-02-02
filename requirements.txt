@@ -3,5 +3,5 @@ Flask~=2.2.2
 PyYAML~=6.0
 scikit-learn
 joblib~=1.2.0
-numpy~=1.24.1
+numpy
 Flask-MySQLdb~=1.0.1
