@@ -1,24 +1,16 @@
 import cv2
 import os
 from flask import Flask, request, render_template
-from datetime import date, datetime
+from datetime import date
+from datetime import datetime
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 import joblib
-import yaml
-from flask_mysqldb import MySQL
+from connect import conn
 
 #### Defining Flask App
 app = Flask(__name__)
 
-db = yaml.safe_load(open('static/db.yaml'))
-
-app.config['MYSQL_HOST'] = db['mysql_host']
-app.config['MYSQL_USER'] = db['mysql_user']
-app.config['MYSQL_PASSWORD'] = db['mysql_password']
-app.config['MYSQL_DB'] = db['mysql_db']
-
-mysql = MySQL(app)
 
 
 #### Saving Date today in 2 different formats
@@ -77,13 +69,8 @@ def train_model():
 
 #### Extract info from today's attendance file in attendance folder
 def extract_attendance():
-    cur = mysql.connection.cursor()
-    l = cur.execute(f"SELECT * FROM {date_today}")
-    userDetails = cur.fetchall()
-    #print(userDetails)
-    mysql.connection.commit()
-    cur.close()
-    return l, userDetails
+    results = conn.read(f"SELECT * FROM \"{date_today}\"")
+    return results
 
 
 #### Add Attendance of a specific user
@@ -92,21 +79,14 @@ def add_attendance(name):
     userid = name.split('_')[1]
     current_time = datetime.now().strftime("%H:%M:%S")
 
-    cur = mysql.connection.cursor()
-    cur.execute(f'SELECT EXISTS(SELECT * FROM {date_today} WHERE roll={userid})')
-    axe = cur.fetchall()
-    mysql.connection.commit()
-    cur.close()
-    if axe[0][0] == 0:
+    exists = conn.read(f'SELECT EXISTS(SELECT * FROM \"{date_today}\" WHERE roll={userid})')
+    if exists[0][0] == 0:
         try:
-            cur = mysql.connection.cursor()
-            cur.execute(f'INSERT INTO {date_today}(name, roll, time) VALUES (%s, %s, %s)',
-                        (username, userid, current_time))
-            mysql.connection.commit()
-            cur.close()
+            conn.insert(f'INSERT INTO \"{date_today}\"(name, roll, time) VALUES (%s, %s, %s)', (username, userid, current_time))
             print('Added Data in Database')
         except Exception as e:
             print(e)
+
 
 
 ################## ROUTING FUNCTIONS #########################
@@ -114,14 +94,11 @@ def add_attendance(name):
 # Our main page
 @app.route('/')
 def home():
-    cur = mysql.connection.cursor()
-    cur.execute(f'CREATE TABLE IF NOT EXISTS {date_today}(name VARCHAR(20), roll INT, time TIME)')
-    no_of_tables = cur.execute('SHOW TABLES')
+    #no_of_tables = cur.execute('SHOW TABLES')
     #print('Tables', no_of_tables)
-    mysql.connection.commit()
-    cur.close()
-    l, userDetails = extract_attendance()
-    return render_template('home.html', l=l, totalreg=totalreg(),
+    conn.create(f'CREATE TABLE IF NOT EXISTS \"{date_today}\"(name VARCHAR(20), roll INT, time TIME)')
+    userDetails = extract_attendance()
+    return render_template('home.html', l=len(userDetails), totalreg=totalreg(),
                            datetoday2=datetoday2(), userDetails=userDetails)
 
 
@@ -149,8 +126,8 @@ def start():
             break
     cap.release()
     cv2.destroyAllWindows()
-    l, userDetails = extract_attendance()
-    return render_template('home.html', l=l, totalreg=totalreg(),
+    userDetails = extract_attendance()
+    return render_template('home.html', l=len(userDetails), totalreg=totalreg(),
                            datetoday2=datetoday2(), userDetails=userDetails)
 
 
@@ -163,18 +140,18 @@ def add():
     if not os.path.isdir(userimagefolder):
         os.makedirs(userimagefolder)
     cap = cv2.VideoCapture(0)
-    noOfImg, j = 0, 0
+    i, j = 0, 0
     while 1:
         _, frame = cap.read()
         faces = extract_faces(frame)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 20), 2)
-            cv2.putText(frame, f'Images Captured: {noOfImg}/20', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 20), 2,
+            cv2.putText(frame, f'Images Captured: {i}/20', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 20), 2,
                         cv2.LINE_AA)
             if j % 10 == 0:
-                name = newusername + '_' + str(noOfImg) + '.jpg'
+                name = newusername + '_' + str(i) + '.jpg'
                 cv2.imwrite(userimagefolder + '/' + name, frame[y:y + h, x:x + w])
-                noOfImg += 1
+                i += 1
             j += 1
         if j == 200:
             break
@@ -185,12 +162,11 @@ def add():
     cv2.destroyAllWindows()
     print('Training Model')
     train_model()
-    l, userDetails = extract_attendance()
-    return render_template('home.html', l=l, totalreg=totalreg(),
+    userDetails = extract_attendance()
+    return render_template('home.html', l=len(userDetails), totalreg=totalreg(),
                            datetoday2=datetoday2(), userDetails=userDetails)
 
 
 #### Our main function which runs the Flask App
 if __name__ == '__main__':
     app.run(debug=True)
-    
