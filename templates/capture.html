@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Start Capture</title>
+    <style>
+        /* Add some cool UI styles here */
+        button {
+        			font-size: 1.2em;
+			padding: 0.5em 1em;
+			background-color: #007bff;
+			color: #fff;
+			border: none;
+			border-radius: 0.3em;
+			cursor: pointer;
+		}
+
+		body {
+            background-image: url('https://cutewallpaper.org/21/1920-x-1080-gif/1920x1080-Wallpapercartoon-Wallpapers-Driverlayer-Search-.gif');
+		}
+
+    </style>
+</head>
+<body>
+<video id="video" width="640" height="480"></video>
+<h6 style="width: auto;margin: auto;text-align: center;color: white;padding: 11px;font-size: 24px;" id="counter">0/20 Images Captured</h6>
+<div style="text-align: center;">
+<button id='capture-btn' onclick="startCapturing()">Start Capturing</button>
+</div>
+<script>
+        var video = document.querySelector('#video');
+        const captureButton = document.getElementById('capture-btn');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function(err) {
+            console.log("An error occurred: " + err);
+        });
+
+        let i = 1;
+		let intervalId;
+
+        async function startCapturing() {
+            captureButton.disabled = true;
+            intervalId = setInterval(() => {
+				const canvas = document.createElement('canvas');
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+				const dataUrl = canvas.toDataURL('image/jpeg');
+				const xhr = new XMLHttpRequest();
+				xhr.open('POST', '/save', true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
+				//xhr.send(JSON.stringify({ dataUrl, name: "{{ name }}", roll: "{{ roll }}", index: i }));
+				xhr.send(JSON.stringify({ dataUrl, index: i }));
+				i += 1;
+				counter.textContent = `${i - 1}/20 Images Captured`;
+				if (i > 20) {
+				clearInterval(intervalId);
+				captureButton.disabled = false;
+				window.close();
+				window.opener.location.href = '/';
+				}
+			}, 1000);
+        }
+
+
+</script>
+</body>
+</html>
