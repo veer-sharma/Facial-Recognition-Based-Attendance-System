@@ -159,7 +159,7 @@ def save():
     img = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
     cv2.imwrite(f'{filepath}\{filename}', img)
     print('Training Model')
-    train_model()
+    #train_model()
     return '', 204
 
 
