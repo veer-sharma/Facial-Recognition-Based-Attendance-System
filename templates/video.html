@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera Page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        button {
+            font-size: 1.2em;
+			padding: 0.5em 1em;
+			background-color: #007bff;
+			color: #fff;
+			border: none;
+			border-radius: 0.3em;
+			cursor: pointer;
+		}
+    	body {
+            background-image: url('https://cutewallpaper.org/21/1920-x-1080-gif/1920x1080-Wallpapercartoon-Wallpapers-Driverlayer-Search-.gif');
+		}
+    </style>
+</head>
+<body>
+    <video id="video" width="640" height="480" autoplay></video>
+    <div style="text-align: center;">
+    <button id="capture-btn">Capture Image</button>
+    </div>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <script>
+        var video = document.querySelector('#video');
+        var canvas = document.querySelector('#canvas');
+        var captureButton = document.querySelector('#capture-btn');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function(err) {
+            console.log("An error occurred: " + err);
+        });
+
+        captureButton.addEventListener('click', function() {
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            var imageData = canvas.toDataURL();
+            fetch('/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image: imageData
+                })
+            })
+            .then(function(response) {
+                window.close();
+                window.opener.location.reload();
+                console.log("Image captured and sent to server");
+            })
+            .catch(function(err) {
+                console.log("An error occurred: " + err);
+            });
+        });
+    </script>
+</body>
+</html>
