@@ -73,10 +73,11 @@
             style="border-radius: 20px;padding: 0px;background-color:rgb(211,211,211,0.5);margin:0px 10px 10px 10px;min-height: 400px;">
             <h2 style="border-radius: 20px 20px 0px 0px;background-color: #0b4c61;color: white;padding: 10px;">Today's
                 Attendance <i class="material-icons">assignment</i></h2>
-            <a style="text-decoration: none;max-width: 300px;" href="/start">
+            <!-- <a style="text-decoration: none;max-width: 300px;" href="/video" > -->
+            <a style="text-decoration: none;max-width: 300px;">
                 <button
-                    style="font-size: 24px;font-weight: bold;border-radius: 10px;width:490px;padding: 10px;margin-top: 30px;margin-bottom: 30px;"
-                    type='submit' class='btn btn-primary'>Take Attendance <i
+                    style="font-size: 24px;font-weight: bold;border-radius: 10px;width:86%;padding: 10px;margin-top: 30px;margin-bottom: 30px;"
+                    type='submit' class='btn btn-primary' onclick="openNewWindow()">Take Attendance <i
                         class="material-icons">beenhere</i></button>
             </a>
             <table style="background-color: white;">
@@ -105,7 +106,7 @@
 
         <div class="col"
             style="border-radius: 20px;padding: 0px;background-color:rgb(211,211,211,0.5);margin:0px 10px 10px 10px;height: 400px;">
-            <form action='/add' method="POST" enctype="multipart/form-data">
+            <form action='/start_capture' method="POST" enctype="multipart/form-data" onsubmit="submitForm(event);">
                 <h2 style="border-radius: 20px 20px 0px 0px;background-color: #0b4c61;color: white;padding: 10px;">Add
                     New User <i class="material-icons">control_point_duplicate</i></h2>
                 <label style="font-size: 20px;"><b>Enter New User Name*</b></label>
@@ -133,6 +134,18 @@
 
         function clock() {
             clockElement.textContent = new Date().toString().slice(15, 24);
+        }
+
+        function openNewWindow() {
+            window.open('/video', '_blank', 'height=525,width=650');
+        }
+       
+         function submitForm(event) {
+           event.preventDefault();
+           var form = event.target;
+           var newWindow = window.open("", "newWindow", "width=650,height=580");
+           form.target = "newWindow";
+           form.submit();
         }
 
         setInterval(clock, 1000);
